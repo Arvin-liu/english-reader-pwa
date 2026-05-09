@@ -1,0 +1,14 @@
+{
+  "flow": {
+    "semantic_flow": "表示流动、流畅推进的状态，也可引申为思路连贯。",
+    "structure_example": "The ideas flow naturally from one paragraph to the next."
+  },
+  "structure": {
+    "semantic_flow": "表示构造、组织方式，常用于句式或文章框架。",
+    "structure_example": "This sentence structure makes the meaning easier to follow."
+  },
+  "context": {
+    "semantic_flow": "表示上下文语境，帮助理解词句真实含义。",
+    "structure_example": "Try reading the word again in context before checking the dictionary."
+  }
+}
