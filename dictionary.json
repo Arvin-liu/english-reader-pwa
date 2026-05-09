@@ -1,14 +1,19 @@
 {
-  "flow": {
-    "semantic_flow": "表示流动、流畅推进的状态，也可引申为思路连贯。",
-    "structure_example": "The ideas flow naturally from one paragraph to the next."
-  },
-  "structure": {
-    "semantic_flow": "表示构造、组织方式，常用于句式或文章框架。",
-    "structure_example": "This sentence structure makes the meaning easier to follow."
-  },
-  "context": {
-    "semantic_flow": "表示上下文语境，帮助理解词句真实含义。",
-    "structure_example": "Try reading the word again in context before checking the dictionary."
-  }
+  "look": {"phonetic":"lʊk","translation":"v. 看；看起来；寻找；注意；n. 看；样子；表情"},
+  "looked": {"phonetic":"lʊkt","translation":"v. 看；看起来；寻找；注意（look 的过去式和过去分词）"},
+  "open": {"phonetic":"ˈəʊpən","translation":"adj. 开着的；开放的；公开的；v. 打开；开始；开放"},
+  "opened": {"phonetic":"ˈəʊpənd","translation":"v. 打开；开始；开放（open 的过去式和过去分词）"},
+  "fly": {"phonetic":"flaɪ","translation":"v. 飞；飞行；乘飞机；疾驰；n. 苍蝇"},
+  "flew": {"phonetic":"fluː","translation":"v. 飞；飞行；快速移动（fly 的过去式）"},
+  "bird": {"phonetic":"bɜːd","translation":"n. 鸟；禽"},
+  "house": {"phonetic":"haʊs","translation":"n. 房子；住宅；机构；议院；v. 安置；收藏"},
+  "king": {"phonetic":"kɪŋ","translation":"n. 国王；君主；最重要者"},
+  "door": {"phonetic":"dɔː","translation":"n. 门；门口；入口；机会"},
+  "garden": {"phonetic":"ˈɡɑːdn","translation":"n. 花园；庭园；v. 从事园艺"},
+  "old": {"phonetic":"əʊld","translation":"adj. 老的；旧的；过去的；熟悉的"},
+  "slowly": {"phonetic":"ˈsləʊli","translation":"adv. 缓慢地；慢慢地"},
+  "across": {"phonetic":"əˈkrɒs","translation":"prep./adv. 穿过；横过；在对面；遍及"},
+  "the": {"phonetic":"ðə; ðiː","translation":"art. 这；那；这些；那些（定冠词）"},
+  "he": {"phonetic":"hiː","translation":"pron. 他"},
+  "a": {"phonetic":"ə; eɪ","translation":"art. 一个；某一；每一"}
 }
