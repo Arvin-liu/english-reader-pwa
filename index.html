@@ -2,46 +2,52 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10151f" />
-    <title>English Reader PWA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#07090d" />
+    <title>英语阅读器</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <main class="app">
-      <header class="toolbar">
-        <h1>英语点击发音阅读器</h1>
-        <div class="controls">
-          <label>语速
-            <input id="rate" type="range" min="0.6" max="1.4" step="0.1" value="1" />
-            <span id="rateValue">1.0x</span>
-          </label>
-          <label>字号
-            <input id="fontSize" type="range" min="16" max="32" step="1" value="20" />
-            <span id="fontValue">20px</span>
-          </label>
-          <button id="themeToggle" type="button">切换深色模式</button>
-        </div>
-      </header>
-
-      <section class="input-area">
-        <textarea id="textInput" placeholder="粘贴英文内容..."></textarea>
-        <button id="startBtn" type="button">开始阅读</button>
+  <body class="dark">
+    <main class="app" aria-label="英语点击发音阅读器">
+      <section id="pasteView" class="paste-view">
+        <textarea id="textInput" class="paste-box" placeholder="粘贴英文内容..." autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
       </section>
 
-      <section id="reader" class="reader"></section>
+      <section id="reader" class="reader" aria-live="polite"></section>
+
+      <button id="settingsToggle" class="settings-toggle" type="button" aria-label="设置">☰</button>
+
+      <aside id="settingsPanel" class="settings-panel" aria-hidden="true">
+        <div class="settings-card">
+          <div class="settings-head">
+            <strong>设置</strong>
+            <button id="closeSettings" type="button" class="ghost">关闭</button>
+          </div>
+          <label>语速 <input id="rate" type="range" min="0.6" max="1.5" step="0.1" /> <span id="rateValue"></span></label>
+          <label>字号 <input id="fontSize" type="range" min="18" max="34" step="1" /> <span id="fontValue"></span></label>
+          <label>主题 <button id="themeToggle" type="button">切换浅色</button></label>
+          <label>当前语音 <span id="voiceName" class="muted">加载中</span></label>
+          <label>选择语音 <select id="voiceSelect"></select></label>
+          <button id="reloadVoices" type="button">重新加载语音列表</button>
+          <p id="dictStatus" class="muted">本地词典加载中...</p>
+          <button id="clearText" type="button" class="danger">清空文本</button>
+          <button id="focusPaste" type="button">重新粘贴</button>
+        </div>
+      </aside>
 
       <dialog id="dictDialog">
-        <article>
+        <article class="dict-card">
           <h2 id="dictWord"></h2>
+          <p id="dictPhonetic" class="muted"></p>
           <p id="dictMeaning"></p>
-          <p id="dictExample"></p>
-          <button id="closeDialog" type="button">关闭</button>
+          <div class="dict-actions">
+            <a id="youdaoLink" target="_blank" rel="noopener">去有道查词</a>
+            <button id="closeDialog" type="button">关闭</button>
+          </div>
         </article>
       </dialog>
     </main>
-
-    <script src="app.js" defer></script>
+    <script src="app.js?v=2" defer></script>
   </body>
 </html>
