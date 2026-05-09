@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10151f" />
+    <title>English Reader PWA</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="toolbar">
+        <h1>英语点击发音阅读器</h1>
+        <div class="controls">
+          <label>语速
+            <input id="rate" type="range" min="0.6" max="1.4" step="0.1" value="1" />
+            <span id="rateValue">1.0x</span>
+          </label>
+          <label>字号
+            <input id="fontSize" type="range" min="16" max="32" step="1" value="20" />
+            <span id="fontValue">20px</span>
+          </label>
+          <button id="themeToggle" type="button">切换深色模式</button>
+        </div>
+      </header>
+
+      <section class="input-area">
+        <textarea id="textInput" placeholder="粘贴英文内容..."></textarea>
+        <button id="startBtn" type="button">开始阅读</button>
+      </section>
+
+      <section id="reader" class="reader"></section>
+
+      <dialog id="dictDialog">
+        <article>
+          <h2 id="dictWord"></h2>
+          <p id="dictMeaning"></p>
+          <p id="dictExample"></p>
+          <button id="closeDialog" type="button">关闭</button>
+        </article>
+      </dialog>
+    </main>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
