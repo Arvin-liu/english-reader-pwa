@@ -24,9 +24,8 @@ const closeDialog = document.getElementById('closeDialog');
 
 let voices = [];
 let dictionary = {};
-let sentences = [];
+let readingUnits = [];
 let progressIndex = Number(localStorage.getItem('reader_index') || 0);
-let longPressTimer = null;
 
 const state = {
   rate: Number(localStorage.getItem('reader_rate') || 1),
@@ -80,13 +79,63 @@ function speak(text) {
   speechSynthesis.speak(u);
 }
 
-function splitSentences(text) {
-  const protectedText = text
-    .replace(/\b(Mr|Mrs|Ms|Dr|Prof)\./g, '$1<dot>')
-    .replace(/\b(e\.g|i\.e)\./gi, m => m.replace(/\./g, '<dot>'))
-    .replace(/\b(U\.S|U\.K)\./g, m => m.replace(/\./g, '<dot>'));
-  const parts = protectedText.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [];
-  return parts.map(s => s.replace(/<dot>/g, '.').trim()).filter(Boolean);
+function splitReadingUnits(line) {
+  const text = line || '';
+  const strong = new Set(['.', '?', '!', '。', '？', '！']);
+  const weak = new Set([',', '，', ';', '；']);
+  const chunks = [];
+  let buffer = '';
+
+  function pushBuffer() {
+    const part = buffer.trim();
+    if (part) chunks.push(part);
+    buffer = '';
+  }
+
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i];
+    buffer += ch;
+    if (strong.has(ch)) {
+      const prev = text[i - 1] || '';
+      const next = text[i + 1] || '';
+      const isNumberingDot = ch === '.' && /\d/.test(prev) && (next === ' ' || next === '\t');
+      if (!isNumberingDot) {
+        pushBuffer();
+      }
+      continue;
+    }
+    if (weak.has(ch)) {
+      const current = buffer.trim();
+      if (current.length >= 36) {
+        pushBuffer();
+      }
+      continue;
+    }
+  }
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  // Fallback for lines without punctuation: split by length.
+  const units = [];
+  chunks.forEach(chunk => {
+    if (chunk.length <= 180) {
+      units.push(chunk);
+      return;
+    }
+    const pieces = chunk.split(/([,，;；])/);
+    let longBuffer = '';
+    pieces.forEach(piece => {
+      if (!piece) return;
+      const next = longBuffer + piece;
+      if (next.trim().length > 180 && longBuffer.trim()) {
+        units.push(longBuffer.trim());
+        longBuffer = piece;
+      } else {
+        longBuffer = next;
+      }
+    });
+    if (longBuffer.trim()) units.push(longBuffer.trim());
+  });
+  return units.filter(Boolean);
 }
 
 function normalizeWord(word) {
@@ -125,56 +174,48 @@ function saveState() {
 
 function render() {
   reader.innerHTML = '';
-  sentences.forEach((sentence, index) => {
-    const div = document.createElement('div');
-    div.className = 'sentence';
-    div.dataset.index = String(index);
-    if (index === progressIndex) div.classList.add('active');
+  const text = textInput.value.replace(/\r\n/g, '\n');
+  const paragraphs = text.split(/\n{2,}/);
+  let unitIndex = 0;
 
-    sentence.split(/(\b[A-Za-z']+\b)/).forEach(part => {
-      if (/^[A-Za-z']+$/.test(part)) {
-        const span = document.createElement('span');
-        span.textContent = part;
-        span.className = 'word';
-        span.dataset.word = part;
-        div.appendChild(span);
-      } else {
-        div.appendChild(document.createTextNode(part));
-      }
+  paragraphs.forEach(paragraphText => {
+    const paragraph = document.createElement('p');
+    paragraph.className = 'reader-paragraph';
+    const lines = paragraphText.split('\n');
+    lines.forEach((line, lineIndex) => {
+      if (!line.trim()) return;
+      const units = splitReadingUnits(line);
+      units.forEach(unit => {
+        const unitSpan = document.createElement('span');
+        unitSpan.className = 'reading-unit';
+        unitSpan.dataset.index = String(unitIndex);
+        if (unitIndex === progressIndex) unitSpan.classList.add('active');
+        readingUnits[unitIndex] = unit;
+
+        unit.split(/(\b[A-Za-z']+\b)/).forEach(part => {
+          if (/^[A-Za-z']+$/.test(part)) {
+            const word = document.createElement('span');
+            word.textContent = part;
+            word.className = 'word';
+            word.dataset.word = part;
+            unitSpan.appendChild(word);
+          } else {
+            unitSpan.appendChild(document.createTextNode(part));
+          }
+        });
+        paragraph.appendChild(unitSpan);
+        paragraph.appendChild(document.createTextNode(' '));
+        unitIndex += 1;
+      });
+      if (lineIndex < lines.length - 1) paragraph.appendChild(document.createElement('br'));
     });
-
-    div.addEventListener('click', e => {
-      const word = e.target.closest('.word');
-      if (word) {
-        speak(word.dataset.word);
-        return;
-      }
-      progressIndex = index;
-      markActive(index);
-      speak(sentence.trim());
-      saveState();
-    });
-
-    div.addEventListener('dblclick', e => {
-      const word = e.target.closest('.word');
-      if (word) showDictionary(word.dataset.word);
-    });
-    div.addEventListener('touchstart', e => {
-      const word = e.target.closest('.word');
-      if (!word) return;
-      longPressTimer = setTimeout(() => showDictionary(word.dataset.word), 520);
-    }, { passive: true });
-    div.addEventListener('touchend', () => clearTimeout(longPressTimer));
-    div.addEventListener('touchmove', () => clearTimeout(longPressTimer));
-    div.addEventListener('touchcancel', () => clearTimeout(longPressTimer));
-
-    reader.appendChild(div);
+    reader.appendChild(paragraph);
   });
-  pasteView.style.display = sentences.length ? 'none' : 'flex';
+  pasteView.style.display = readingUnits.length ? 'none' : 'flex';
 }
 
 function markActive(index) {
-  [...reader.children].forEach(el => el.classList.remove('active'));
+  [...reader.querySelectorAll('.reading-unit.active')].forEach(el => el.classList.remove('active'));
   const active = reader.querySelector(`[data-index="${index}"]`);
   if (active) {
     active.classList.add('active');
@@ -183,11 +224,36 @@ function markActive(index) {
 }
 
 function processText(text) {
-  sentences = splitSentences(text);
-  progressIndex = Math.min(progressIndex, Math.max(0, sentences.length - 1));
+  readingUnits = [];
   render();
+  progressIndex = Math.min(progressIndex, Math.max(0, readingUnits.length - 1));
+  markActive(progressIndex);
   saveState();
 }
+
+reader.addEventListener('click', e => {
+  const word = e.target.closest('.word');
+  if (word) {
+    e.stopPropagation();
+    speak(word.dataset.word);
+    return;
+  }
+  const unit = e.target.closest('.reading-unit');
+  if (!unit) return;
+  progressIndex = Number(unit.dataset.index);
+  markActive(progressIndex);
+  speak(readingUnits[progressIndex]);
+  saveState();
+});
+
+reader.addEventListener('dblclick', e => {
+  const word = e.target.closest('.word');
+  if (!word) return;
+  e.preventDefault();
+  e.stopPropagation();
+  speak(word.dataset.word);
+  showDictionary(word.dataset.word);
+});
 
 function showDictionary(rawWord) {
   const word = normalizeWord(rawWord);
@@ -255,7 +321,7 @@ reloadVoices.addEventListener('click', loadVoices);
 clearText.addEventListener('click', () => {
   speechSynthesis.cancel();
   textInput.value = '';
-  sentences = [];
+  readingUnits = [];
   progressIndex = 0;
   localStorage.removeItem('reader_text');
   localStorage.removeItem('reader_index');
@@ -265,7 +331,7 @@ clearText.addEventListener('click', () => {
 });
 
 focusPaste.addEventListener('click', () => {
-  sentences = [];
+  readingUnits = [];
   reader.innerHTML = '';
   pasteView.style.display = 'flex';
   settingsPanel.classList.remove('open');
