@@ -1,10 +1,10 @@
-const CACHE_NAME = 'english-reader-v3';
+const CACHE_NAME = 'english-reader-v4';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
-  './app.js?v=3',
-  './dictionary.json?v=3',
+  './app.js?v=4',
+  './dictionary.json?v=4',
   './manifest.json'
 ];
 
