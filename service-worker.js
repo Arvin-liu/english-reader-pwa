@@ -1,16 +1,16 @@
-const CACHE_NAME = 'english-reader-v4';
+const CACHE_NAME = 'english-reader-v6';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js?v=4',
-  './dictionary.json?v=4',
+  './style.css?v=6',
+  './app.js?v=6',
+  './dictionary.json?v=6',
   './manifest.json'
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
